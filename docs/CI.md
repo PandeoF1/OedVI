@@ -11,38 +11,30 @@ Two workflows in `.github/workflows/`:
 
 ## Runners
 
-Every job runs on **your own runners** by default: labels `self-hosted` and
-`linux` (lint, tests, server, Docker image, release publishing) or `windows`
-(the launcher build). GitHub adds the `linux`/`windows` labels itself when you
-register a runner.
+Every job runs on **your own Linux runner** by default (labels `self-hosted`
+and `linux`; GitHub adds them itself when you register a runner). **No Windows
+machine is needed**: the Windows installer is cross-compiled on Linux
+(`cargo-xwin` targets MSVC, NSIS builds the installer), by the composite action
+`.github/actions/windows-build`.
 
-To use other runners, for one job type or all, set repository variables
-(Settings → Secrets and variables → Actions → Variables). Each is a JSON list
-of runner labels:
-
-| Variable | Default | Used by |
-|---|---|---|
-| `RUNNER_LINUX` | `["self-hosted","linux"]` | lint and tests, server, Docker image, release publishing |
-| `RUNNER_WINDOWS` | `["self-hosted","windows"]` | the launcher build |
-
-For example `RUNNER_WINDOWS` = `["windows-latest"]` goes back to GitHub's
-hosted runner. Nothing in the workflow files needs to change.
+To use other runners, set the repository variable
+`RUNNER_LINUX` (Settings → Secrets and variables → Actions → Variables) to a
+JSON list of labels, e.g. `["ubuntu-latest"]` for GitHub's hosted runner.
+Nothing in the workflow files needs to change.
 
 Set up a runner with the instructions of Settings → Actions → Runners → *New
-self-hosted runner*, then install once, by hand (a GitHub-hosted runner would have them):
+self-hosted runner*. It needs, once:
 
-**Linux runner**
-- Rust (`rustup`), Node.js 22, Docker (for the image check).
-- Tauri's system libraries: `libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev
-  libayatana-appindicator3-dev`. The workflow skips `apt-get` on self-hosted
-  runners.
+- Rust (`rustup`), Node.js 22, Docker (for the image check), `git`, `curl`.
+- `apt` access (root or `sudo`): the first run installs `nsis lld llvm clang`
+  and Tauri's libraries (`libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev
+  libayatana-appindicator3-dev`), then `cargo install cargo-xwin`. Install them
+  yourself to skip it.
+- Internet access: the Windows SDK and CRT are downloaded on the first build
+  (cached afterwards).
 
-**Windows runner**
-- Rust (`rustup`, MSVC toolchain), Node.js 22, Visual Studio Build Tools with
-  the “Desktop development with C++” workload, WebView2 (present on Windows
-  10/11), and Git for Windows (the steps use `bash`).
-- To build the NSIS installer, Tauri downloads NSIS the first time; the runner
-  needs internet access.
+The cross-built installer is not Authenticode-signed (Windows SmartScreen may
+warn); updates are still verified by the launcher with the minisign key below.
 
 ## Secrets for a release
 

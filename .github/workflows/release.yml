@@ -17,8 +17,8 @@ env:
 # Runner variables: see ci.yml and docs/CI.md.
 jobs:
   launcher:
-    name: Signed Windows installer
-    runs-on: ${{ fromJSON(vars.RUNNER_WINDOWS || '["self-hosted","windows"]') }}
+    name: Signed Windows installer (built on Linux)
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["self-hosted","linux"]') }}
     env:
       # Repository secrets (docs/CI.md). The key is yours: generate it with
       # `npx tauri signer generate`. Without it the release cannot be built,
@@ -37,30 +37,22 @@ jobs:
             echo "::error::Set the TAURI_SIGNING_PRIVATE_KEY and OEDVI_UPDATER_PUBKEY secrets (see docs/CI.md)."
             exit 1
           fi
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: launcher/package-lock.json
-      - name: Build and sign
+      - name: Release config
         working-directory: launcher
-        shell: bash
-        run: |
-          npm ci
-          node scripts/release-config.mjs
-          npx tauri build --bundles nsis --config src-tauri/tauri.release.local.conf.json
+        run: node scripts/release-config.mjs
+      - uses: ./.github/actions/windows-build
+        with:
+          config: src-tauri/tauri.release.local.conf.json
       - name: Write latest.json
         shell: bash
-        run: node launcher/scripts/make-latest-json.mjs target/release/bundle/nsis "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}"
+        run: node launcher/scripts/make-latest-json.mjs target/x86_64-pc-windows-msvc/release/bundle/nsis "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}"
       - uses: actions/upload-artifact@v4
         with:
           name: launcher
           path: |
-            target/release/bundle/nsis/*_x64-setup.exe
-            target/release/bundle/nsis/*_x64-setup.exe.sig
-            target/release/bundle/nsis/latest.json
+            target/x86_64-pc-windows-msvc/release/bundle/nsis/*_x64-setup.exe
+            target/x86_64-pc-windows-msvc/release/bundle/nsis/*_x64-setup.exe.sig
+            target/x86_64-pc-windows-msvc/release/bundle/nsis/latest.json
 
   server:
     name: Server and CLI (Linux)

@@ -1,0 +1,43 @@
+name: Windows installer (cross-compiled on Linux)
+description: >
+  Builds the NSIS installer of the launcher on a Linux runner with cargo-xwin
+  (MSVC target, Windows SDK downloaded on first use). No Windows machine needed.
+inputs:
+  config:
+    description: Extra Tauri config file (release signing), relative to launcher/
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Tools (NSIS, LLVM, Tauri's Linux libraries)
+      shell: bash
+      run: |
+        need=""
+        for t in makensis lld-link clang llvm-rc; do command -v $t >/dev/null || need=1; done
+        if [ -n "$need" ]; then
+          SUDO=""; [ "$(id -u)" != 0 ] && SUDO=sudo
+          $SUDO apt-get update
+          $SUDO apt-get install -y --no-install-recommends nsis lld llvm clang libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev
+        fi
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: x86_64-pc-windows-msvc
+    - uses: Swatinem/rust-cache@v2
+    - name: cargo-xwin
+      shell: bash
+      run: command -v cargo-xwin >/dev/null || cargo install cargo-xwin --locked
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: launcher/package-lock.json
+    - name: Build the installer
+      working-directory: launcher
+      shell: bash
+      env:
+        XWIN_ACCEPT_LICENSE: "1"
+      run: |
+        npm ci
+        extra=()
+        [ -n "${{ inputs.config }}" ] && extra=(--config "${{ inputs.config }}")
+        npx tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis "${extra[@]}"

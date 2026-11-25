@@ -16,11 +16,10 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
 
-# Every job runs on your own runners by default (labels `self-hosted` +
-# `linux` or `windows`). To change that, set a repository variable (Settings →
+# Every job runs on your own Linux runner by default (labels `self-hosted` +
+# `linux`; the Windows installer is cross-compiled). To change that, set a variable (Settings →
 # Secrets and variables → Actions → Variables), a JSON list of labels:
 #   RUNNER_LINUX   default ["self-hosted","linux"]     e.g. ["ubuntu-latest"]
-#   RUNNER_WINDOWS default ["self-hosted","windows"]   e.g. ["windows-latest"]
 # See docs/CI.md for what a self-hosted runner needs installed.
 
 jobs:
@@ -76,25 +75,13 @@ jobs:
         run: docker build -f deploy/Dockerfile -t oedvi-server:ci .
 
   launcher:
-    name: Launcher (Windows, unsigned)
-    runs-on: ${{ fromJSON(vars.RUNNER_WINDOWS || '["self-hosted","windows"]') }}
+    name: Launcher (Windows installer, unsigned)
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["self-hosted","linux"]') }}
     needs: check
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: launcher/package-lock.json
-      - name: Build
-        working-directory: launcher
-        shell: bash
-        run: |
-          npm ci
-          npx tauri build --bundles nsis
+      - uses: ./.github/actions/windows-build
       - uses: actions/upload-artifact@v4
         with:
           name: oedvi-launcher-windows
-          path: target/release/bundle/nsis/*
+          path: target/x86_64-pc-windows-msvc/release/bundle/nsis/*
