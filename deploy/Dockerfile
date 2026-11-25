@@ -3,6 +3,8 @@ FROM rust:1-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY crates crates
+# Built-in templates and builders are embedded at compile time.
+COPY examples/server examples/server
 # The launcher is a workspace member but is not built here; give cargo a stub
 # so the workspace resolves without the WebView dependencies.
 RUN mkdir -p launcher/src-tauri/src \
