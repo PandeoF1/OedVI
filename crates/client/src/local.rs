@@ -23,6 +23,7 @@ pub const BUILDERS: &[(&str, &str)] = &[
     ("dexnom-rt", include_str!("../../../examples/server/builders/dexnom-rt.toml")),
     ("dexnom-warp", include_str!("../../../examples/server/builders/dexnom-warp.toml")),
     ("dexnom-workers", include_str!("../../../examples/server/builders/dexnom-workers.toml")),
+    ("xtx7900", include_str!("../../../examples/server/builders/xtx7900.toml")),
     ("upstream", include_str!("../../../examples/server/builders/upstream.toml")),
     ("upstream-diag", include_str!("../../../examples/server/builders/upstream-diag.toml")),
 ];

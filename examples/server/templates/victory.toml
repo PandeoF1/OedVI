@@ -39,7 +39,7 @@ VICTORY_DATA_DIR = "{data_dir}"
 # per-phase stats. The names are free: rename them. Here they are the packs
 # the game opens, in order (the same on every launch in our logs).
 [phases]
-"1 Licenses" = 'file opened path="G:.{1,4}pack.{1,4}core_licenses'
-"2 World (core_restofworld)" = 'file opened path="G:.{1,4}pack.{1,4}core_restofworld001'
-"3 Shared minigame" = 'file opened path="G:.{1,4}pack.{1,4}shared_minigame000\\'
-"4 Story 000" = 'file opened path="G:.{1,4}pack.{1,4}story000\\'
+"1 Licenses" = 'file opened path="[A-Za-z]:.{1,4}pack.{1,4}core_licenses'
+"2 World (core_restofworld)" = 'file opened path="[A-Za-z]:.{1,4}pack.{1,4}core_restofworld001'
+"3 Shared minigame" = 'file opened path="[A-Za-z]:.{1,4}pack.{1,4}shared_minigame000\\'
+"4 Story 000" = 'file opened path="[A-Za-z]:.{1,4}pack.{1,4}story000\\'

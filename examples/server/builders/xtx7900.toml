@@ -1,0 +1,8 @@
+# The 7900 XTX fork of VIctory, in its own clone.
+extends = "victory"
+name = "7900 XTX · Release"
+description = "avatarmanz/VIctory-7900XTX, main branch."
+repo = "https://github.com/avatarmanz/VIctory-7900XTX"
+checkout = "victory-7900xtx"
+tags = ["victory", "7900xtx", "release"]
+order = 50
