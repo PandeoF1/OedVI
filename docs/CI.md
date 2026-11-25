@@ -9,22 +9,27 @@ Two workflows in `.github/workflows/`:
   installer, writes `latest.json` for the in-app updater, builds the Linux
   server and CLI, and publishes a GitHub release with all of it.
 
-## Using your own runner
+## Runners
 
-Where the jobs run is read from two repository variables (Settings → Secrets
-and variables → Actions → Variables). Each is a JSON list of runner labels:
+Every job runs on **your own runners** by default: labels `self-hosted` and
+`linux` (lint, tests, server, Docker image, release publishing) or `windows`
+(the launcher build). GitHub adds the `linux`/`windows` labels itself when you
+register a runner.
+
+To use other runners, for one job type or all, set repository variables
+(Settings → Secrets and variables → Actions → Variables). Each is a JSON list
+of runner labels:
 
 | Variable | Default | Used by |
 |---|---|---|
-| `RUNNER_LINUX` | `["ubuntu-latest"]` | lint and tests, server, Docker image, release publishing |
-| `RUNNER_WINDOWS` | `["windows-latest"]` | the launcher build |
+| `RUNNER_LINUX` | `["self-hosted","linux"]` | lint and tests, server, Docker image, release publishing |
+| `RUNNER_WINDOWS` | `["self-hosted","windows"]` | the launcher build |
 
-For example, `RUNNER_WINDOWS` = `["self-hosted","windows"]`. Nothing in the
-workflow files needs to change. If the variables are not set, GitHub-hosted
-runners are used.
+For example `RUNNER_WINDOWS` = `["windows-latest"]` goes back to GitHub's
+hosted runner. Nothing in the workflow files needs to change.
 
 Set up a runner with the instructions of Settings → Actions → Runners → *New
-self-hosted runner*, then install once, by hand (a hosted runner has them):
+self-hosted runner*, then install once, by hand (a GitHub-hosted runner would have them):
 
 **Linux runner**
 - Rust (`rustup`), Node.js 22, Docker (for the image check).

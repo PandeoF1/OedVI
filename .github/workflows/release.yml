@@ -18,7 +18,7 @@ env:
 jobs:
   launcher:
     name: Signed Windows installer
-    runs-on: ${{ fromJSON(vars.RUNNER_WINDOWS || '["windows-latest"]') }}
+    runs-on: ${{ fromJSON(vars.RUNNER_WINDOWS || '["self-hosted","windows"]') }}
     env:
       # Repository secrets (docs/CI.md). The key is yours: generate it with
       # `npx tauri signer generate`. Without it the release cannot be built,
@@ -64,7 +64,7 @@ jobs:
 
   server:
     name: Server and CLI (Linux)
-    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["self-hosted","linux"]') }}
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -80,7 +80,7 @@ jobs:
   publish:
     name: GitHub release
     needs: [launcher, server]
-    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["self-hosted","linux"]') }}
     env:
       OEDVI_SERVER_URL: ${{ secrets.OEDVI_SERVER_URL }}
       OEDVI_ADMIN_TOKEN: ${{ secrets.OEDVI_ADMIN_TOKEN }}

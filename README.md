@@ -192,7 +192,7 @@ npm run tauri build -- --bundles nsis              # installer in target\release
 ## Releases and updates
 
 Releases are built by GitHub Actions (see [docs/CI.md](docs/CI.md), including
-how to use your own runner). To release:
+how to set up your runners). To release:
 
 1. Generate the signing key once: `npx tauri signer generate -w oedvi.key`.
    Keep the private key to yourself, never in git.

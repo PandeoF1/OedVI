@@ -16,17 +16,17 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
 
-# Where the jobs run is a repository variable (Settings → Secrets and
-# variables → Actions → Variables), so a self-hosted runner needs no edit
-# here. Each one is a JSON list of labels:
-#   RUNNER_LINUX   default ["ubuntu-latest"]    e.g. ["self-hosted","linux"]
-#   RUNNER_WINDOWS default ["windows-latest"]    e.g. ["self-hosted","windows"]
+# Every job runs on your own runners by default (labels `self-hosted` +
+# `linux` or `windows`). To change that, set a repository variable (Settings →
+# Secrets and variables → Actions → Variables), a JSON list of labels:
+#   RUNNER_LINUX   default ["self-hosted","linux"]     e.g. ["ubuntu-latest"]
+#   RUNNER_WINDOWS default ["self-hosted","windows"]   e.g. ["windows-latest"]
 # See docs/CI.md for what a self-hosted runner needs installed.
 
 jobs:
   check:
     name: Lint and tests
-    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["self-hosted","linux"]') }}
     steps:
       - uses: actions/checkout@v5
       - name: Tauri system dependencies
@@ -59,7 +59,7 @@ jobs:
 
   server:
     name: oedvi-server and CLI (Linux)
-    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["self-hosted","linux"]') }}
     needs: check
     steps:
       - uses: actions/checkout@v5
@@ -77,7 +77,7 @@ jobs:
 
   launcher:
     name: Launcher (Windows, unsigned)
-    runs-on: ${{ fromJSON(vars.RUNNER_WINDOWS || '["windows-latest"]') }}
+    runs-on: ${{ fromJSON(vars.RUNNER_WINDOWS || '["self-hosted","windows"]') }}
     needs: check
     steps:
       - uses: actions/checkout@v5
