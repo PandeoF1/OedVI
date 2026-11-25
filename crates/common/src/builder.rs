@@ -504,6 +504,6 @@ VICTORY_HAIR = "1"
         assert!(list.errors.is_empty(), "{:?}", list.errors);
         assert!(list.builders.len() >= 10);
         let dex = list.builders.iter().find(|b| b.id == "dexnom-release").unwrap();
-        assert_eq!(dex.phases.len(), 4);
+        assert_eq!(dex.phases.len(), 6);
     }
 }
