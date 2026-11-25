@@ -220,10 +220,15 @@ impl Ctx {
     }
     async fn builder(&self, id: &str) -> anyhow::Result<BuilderDef> {
         let list = self.builder_list().await?;
+        let found = list.builders.iter().find(|b| b.id == id).cloned();
+        if let Some(mut b) = found {
+            self.settings.apply_ref_override(&mut b);
+            return Ok(b);
+        }
         if let Some(err) = list.errors.iter().find(|e| e.id == id) {
             bail!("builder {id} is invalid: {}", err.message);
         }
-        list.builders.into_iter().find(|b| b.id == id).with_context(|| format!("unknown builder {id:?}"))
+        bail!("unknown builder {id:?}")
     }
 }
 

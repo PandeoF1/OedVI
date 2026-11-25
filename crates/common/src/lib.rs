@@ -1,6 +1,7 @@
 //! Types and algorithms shared by the server, the client library and the launcher.
 
 pub mod builder;
+pub mod defaults;
 pub mod hash;
 pub mod manifest;
 pub mod paths;

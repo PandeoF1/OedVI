@@ -196,8 +196,17 @@ impl AppState {
 
     fn builder(&self, id: &str) -> CmdResult<BuilderDef> {
         let list = self.builders.read().unwrap().clone().or_else(|| self.state_files().ok()?.1.builders());
-        list.and_then(|l| l.builders.into_iter().find(|b| b.id == id))
-            .ok_or_else(|| format!("builder {id:?} is unknown or invalid"))
+        let mut def = list
+            .and_then(|l| l.builders.into_iter().find(|b| b.id == id))
+            .ok_or_else(|| format!("builder {id:?} is unknown or invalid"))?;
+        self.settings().apply_ref_override(&mut def);
+        Ok(def)
+    }
+
+    /// The builder as its file says, without the ref chosen on this PC.
+    fn builder_default_ref(&self, id: &str) -> Option<String> {
+        let list = self.builders.read().unwrap().clone()?;
+        list.builders.into_iter().find(|b| b.id == id).map(|b| b.git_ref)
     }
 }
 
@@ -436,10 +445,12 @@ async fn list_builders(state: State<'_, AppState>, refresh: bool) -> CmdResult<B
     let builders = list
         .builders
         .into_iter()
-        .map(|b| {
+        .map(|mut b| {
+            let default_ref = b.git_ref.clone();
+            state.settings().apply_ref_override(&mut b);
             let cloned = git::is_cloned(&builder::checkout_dir(&layout, &b));
             let task = state.tasks.current(&b.id);
-            BuilderRow { def: b, cloned, task }
+            BuilderRow { def: b, cloned, task, default_ref }
         })
         .collect();
     Ok(BuilderListView { builders, errors: list.errors, offline })
@@ -452,8 +463,66 @@ struct BuilderListView {
     offline: Option<String>,
 }
 
+/// Branches, tags and commits a repository can be put on.
+#[derive(Serialize)]
+struct RepoRefs {
+    /// The ref the builder file asks for.
+    default_ref: String,
+    /// The ref in use: the default, or the one chosen on this PC.
+    current: String,
+    branches: Vec<String>,
+    tags: Vec<String>,
+    /// Newest commits of the current ref (needs a clone).
+    commits: Vec<git::Commit>,
+    /// Why the remote could not be listed.
+    error: Option<String>,
+}
+
+#[tauri::command]
+async fn repo_refs(state: State<'_, AppState>, id: String) -> CmdResult<RepoRefs> {
+    let def = state.builder(&id)?;
+    let default_ref = state.builder_default_ref(&id).unwrap_or_else(|| def.git_ref.clone());
+    let layout = state.settings().layout();
+    let dir = builder::checkout_dir(&layout, &def);
+    let (remote, commits) = tokio::join!(git::remote_refs(&def.repo), async {
+        if git::is_cloned(&dir) { git::recent_commits(&dir, &def.git_ref, 30).await } else { Vec::new() }
+    });
+    let (refs, error) = match remote {
+        Ok(r) => (r, None),
+        Err(e) => (git::RemoteRefs::default(), Some(format!("{e:#}"))),
+    };
+    Ok(RepoRefs { default_ref, current: def.git_ref, branches: refs.branches, tags: refs.tags, commits, error })
+}
+
+/// Chooses the branch, tag or commit of a builder's repository on this PC
+/// (`None` goes back to the one in the builder file). It applies to every
+/// builder sharing the clone. The clone moves to it with Pull or Resync.
+#[tauri::command]
+fn set_ref(state: State<AppState>, id: String, git_ref: Option<String>) -> CmdResult<()> {
+    let def = state.builder(&id)?;
+    let default_ref = state.builder_default_ref(&id).unwrap_or_default();
+    let mut s = state.settings();
+    let key = def.checkout_key().to_string();
+    match git_ref.map(|r| r.trim().to_string()).filter(|r| !r.is_empty() && *r != default_ref) {
+        Some(r) => {
+            if r.starts_with('-') || r.contains(char::is_whitespace) {
+                return Err("invalid ref".into());
+            }
+            s.ref_overrides.insert(key, r);
+        }
+        None => {
+            s.ref_overrides.remove(&key);
+        }
+    }
+    s.save(&state.settings_path).map_err(anyerr)?;
+    *state.settings.write().unwrap() = s;
+    Ok(())
+}
+
 #[derive(Serialize)]
 struct BuilderRow {
+    /// The ref in the builder file (`def.ref` is the one in use).
+    default_ref: String,
     def: BuilderDef,
     cloned: bool,
     task: Option<tasks::TaskInfo>,
@@ -836,6 +905,8 @@ pub fn run() {
             local_status,
             stats_local,
             live_history,
+            repo_refs,
+            set_ref,
             game_folder_info,
             mark_phase,
             machine_specs,

@@ -37,6 +37,12 @@ token, nothing to configure.
   `[vars]` factors values out, and `checkout` shares one clone (and its build)
   between builders. Variants that only change the game's environment
   (`run_env`) do not rebuild.
+- Builders are grouped by repository, folded by default. Each repository has a
+  **Version** dropdown: the builder file's ref, the branches and tags of the
+  remote, the recent commits, or any branch/tag/commit you type. The choice is
+  yours on this PC (it does not touch the builder file or the server) and
+  applies to every builder sharing the clone; the launcher then offers to move
+  the clone to it.
 - In the app: **Pull** (fast-forward), **Resync** (the repository exactly as
   the remote, `target/` untouched), **Fetch** (lists incoming commits),
   **Build** / **Rebuild**, **Play** (builds only if the commit or the recipe
@@ -45,9 +51,13 @@ token, nothing to configure.
   hides timestamps and filters by level.
 - A built-in editor validates builders and templates before saving; every
   replaced version goes to `.trash/`.
-- A few builders ship with the launcher and are copied to your builders folder
-  on first start. After that they are your files: edit or delete them, they
-  are never overwritten or brought back.
+- **Templates are built into the launcher** (and the server), so builders that
+  `extends` them work anywhere. A template file with the same id replaces the
+  built-in one: in the `templates/` folder on your PC, or, when connected, on
+  the server (the server's wins). Deleting that file brings the built-in back.
+- A few builders also ship with the launcher and are copied to your builders
+  folder on first start. After that they are your files: edit or delete them,
+  they are never overwritten or brought back.
 
 **Build tools installed on demand**
 - A builder declares what it needs: its `stack`, plus `requires`.

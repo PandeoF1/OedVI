@@ -11,6 +11,7 @@ export interface Settings {
   delete_extra: boolean;
   auto_install_tools: boolean;
   builder_env: Record<string, Record<string, string>>;
+  ref_overrides: Record<string, string>;
   machine_name: string;
   share_stats: boolean;
 }
@@ -270,7 +271,18 @@ export interface TaskInfo {
   pid: number | null;
 }
 
+export interface RepoRefs {
+  default_ref: string;
+  current: string;
+  branches: string[];
+  tags: string[];
+  commits: Commit[];
+  error: string | null;
+}
+
 export interface BuilderRow {
+  /** The ref in the builder file (`def.ref` is the one in use). */
+  default_ref: string;
   def: BuilderDef;
   cloned: boolean;
   task: TaskInfo | null;
@@ -385,6 +397,8 @@ export const api = {
   listBuilders: (refresh: boolean) => invoke<BuilderListView>("list_builders", { refresh }),
   gameFolderInfo: () => invoke<{ path: string; exists: boolean; entries: number }>("game_folder_info"),
   markPhase: (id: string, name: string) => invoke<void>("mark_phase", { id, name }),
+  repoRefs: (id: string) => invoke<RepoRefs>("repo_refs", { id }),
+  setRef: (id: string, gitRef: string | null) => invoke<void>("set_ref", { id, gitRef }),
   liveHistory: (id: string) => invoke<LivePointDto[]>("live_history", { id }),
   machineSpecs: () => invoke<Specs>("machine_specs"),
   openOverlay: (id: string) => invoke<void>("open_overlay", { id }),

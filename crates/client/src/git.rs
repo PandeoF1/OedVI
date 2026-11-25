@@ -91,6 +91,62 @@ fn parse_commits(text: &str) -> Vec<Commit> {
         .collect()
 }
 
+/// Branches and tags of a remote repository.
+#[derive(Debug, Clone, Default, Serialize, PartialEq)]
+pub struct RemoteRefs {
+    pub branches: Vec<String>,
+    pub tags: Vec<String>,
+}
+
+/// Reads the output of `git ls-remote --heads --tags --refs`.
+pub fn parse_ls_remote(text: &str) -> RemoteRefs {
+    let mut out = RemoteRefs::default();
+    for line in text.lines() {
+        let Some((_, name)) = line.split_once('\t') else { continue };
+        if let Some(b) = name.strip_prefix("refs/heads/") {
+            out.branches.push(b.to_string());
+        } else if let Some(t) = name.strip_prefix("refs/tags/") {
+            out.tags.push(t.to_string());
+        }
+    }
+    out.branches.sort();
+    // Newest-looking tags first (v1.10 before v1.9).
+    out.tags.sort_by(|a, b| natural_cmp(b, a));
+    out
+}
+
+fn natural_cmp(a: &str, b: &str) -> std::cmp::Ordering {
+    let key = |s: &str| -> Vec<(u64, String)> {
+        s.split(|c: char| !c.is_ascii_alphanumeric())
+            .map(|p| (p.parse::<u64>().unwrap_or(u64::MAX), p.to_string()))
+            .collect()
+    };
+    key(a).cmp(&key(b))
+}
+
+/// The branches and tags of `repo`, without cloning it.
+pub async fn remote_refs(repo: &str) -> anyhow::Result<RemoteRefs> {
+    let text = tokio::time::timeout(
+        std::time::Duration::from_secs(30),
+        output(&["ls-remote", "--heads", "--tags", "--refs", repo], &std::env::temp_dir()),
+    )
+    .await
+    .context("the repository did not answer in 30 s")??;
+    Ok(parse_ls_remote(&text))
+}
+
+/// The newest commits of `git_ref` in a clone (the remote branch when there is one).
+pub async fn recent_commits(dir: &Path, git_ref: &str, n: usize) -> Vec<Commit> {
+    let remote = format!("origin/{git_ref}");
+    let target = if ok(&["rev-parse", "--verify", "-q", &format!("refs/remotes/{remote}")], dir).await {
+        remote
+    } else {
+        git_ref.to_string()
+    };
+    let max = format!("-{n}");
+    output(&["log", &max, LOG_FORMAT, &target], dir).await.map(|t| parse_commits(&t)).unwrap_or_default()
+}
+
 pub fn is_cloned(dir: &Path) -> bool {
     dir.join(".git").exists()
 }
@@ -219,4 +275,18 @@ pub async fn ensure_remote(dir: &Path, repo: &str, sink: &LogSink, cancel: &Canc
 
 pub async fn head(dir: &Path) -> anyhow::Result<String> {
     output(&["rev-parse", "HEAD"], dir).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reads_ls_remote() {
+        let text =
+            "aaa\trefs/heads/main\nbbb\trefs/heads/dev\nccc\trefs/tags/v1.9\nddd\trefs/tags/v1.10\nignored line\n";
+        let r = parse_ls_remote(text);
+        assert_eq!(r.branches, ["dev", "main"]);
+        assert_eq!(r.tags, ["v1.10", "v1.9"], "newest first, numbers compared as numbers");
+    }
 }

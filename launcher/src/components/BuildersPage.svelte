@@ -3,6 +3,7 @@
   import { t } from "../lib/i18n.svelte";
   import Icon from "./Icon.svelte";
   import BuilderDetail from "./BuilderDetail.svelte";
+  import RepoGroup from "./RepoGroup.svelte";
 
   let query = $state("");
   let tag = $state<string | null>(null);
@@ -22,6 +23,23 @@
     );
   });
 
+  // Builders of the same clone, under their repository.
+  let groups = $derived.by(() => {
+    const m = new Map<string, { key: string; repo: string; rows: typeof shown }>();
+    for (const r of shown) {
+      const key = r.def.checkout ?? r.def.id;
+      const g = m.get(key) ?? m.set(key, { key, repo: r.def.repo, rows: [] }).get(key)!;
+      g.rows.push(r);
+    }
+    return [...m.values()];
+  });
+
+  // Folded by default, but the group of the selected builder, and every group
+  // while searching, are open. A click overrides.
+  let open = $state<Record<string, boolean>>({});
+  const isOpen = (g: { key: string; rows: typeof shown }) =>
+    open[g.key] ?? (!!query.trim() || g.rows.some((r) => r.def.id === app.selectedBuilder));
+
   $effect(() => {
     if (!app.selectedBuilder && rows.length) app.selectedBuilder = rows[0].def.id;
   });
@@ -32,13 +50,6 @@
     refreshing = false;
   }
 
-  const stackColors: Record<string, string> = {
-    rust: "#f97316",
-    python: "#3b82f6",
-    node: "#22c55e",
-    dotnet: "#a855f7",
-    cmake: "#eab308",
-  };
 </script>
 
 <div class="page">
@@ -70,22 +81,14 @@
     </div>
 
     <div class="items">
-      {#each shown as r (r.def.id)}
-        {@const task = app.tasks[r.def.id]}
-        <button class="item" class:active={app.selectedBuilder === r.def.id} onclick={() => (app.selectedBuilder = r.def.id)}>
-          <span class="stack" style:background={stackColors[r.def.stack] ?? "var(--dim)"}></span>
-          <div class="col it-text">
-            <span class="it-name ellipsis">{r.def.name}</span>
-            <span class="it-sub ellipsis">{r.def.id} · {r.def.ref}</span>
-          </div>
-          {#if task}
-            <span class="badge {task.kind === 'run' ? 'ok' : 'info'}">
-              <span class="dot busy"></span>{task.kind === "run" ? t("playing") : task.action}
-            </span>
-          {:else if !r.cloned}
-            <span class="dim small">{t("not cloned")}</span>
-          {/if}
-        </button>
+      {#each groups as g (g.key)}
+        <RepoGroup
+          repo={g.repo}
+          rows={g.rows}
+          expanded={isOpen(g)}
+          ontoggle={() => (open[g.key] = !isOpen(g))}
+          onselect={(id) => (app.selectedBuilder = id)}
+        />
       {:else}
         <div class="empty small">
           {rows.length ? t("No result") : isRemote() ? t("No builder on the server. Create one in the editor.") : t("No builder yet. Create one in the editor.")}
@@ -178,42 +181,6 @@
     display: flex;
     flex-direction: column;
     gap: 3px;
-  }
-  .item {
-    width: 100%;
-    background: transparent;
-    border: 1px solid transparent;
-    padding: 9px 10px;
-    border-radius: 10px;
-    text-align: left;
-    gap: 10px;
-  }
-  .item:hover:not(:disabled) {
-    background: var(--panel);
-    border-color: transparent;
-  }
-  .item.active {
-    background: var(--panel-2);
-    border-color: var(--line-2);
-  }
-  .stack {
-    width: 4px;
-    align-self: stretch;
-    border-radius: 4px;
-    flex: none;
-  }
-  .it-text {
-    gap: 1px;
-    flex: 1;
-    min-width: 0;
-  }
-  .it-name {
-    font-weight: 600;
-  }
-  .it-sub {
-    font-size: 11.5px;
-    color: var(--dim);
-    font-family: var(--mono);
   }
   .small {
     font-size: 11.5px;

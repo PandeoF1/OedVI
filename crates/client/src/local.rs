@@ -1,21 +1,16 @@
 //! Standalone mode: builders and templates live in folders of this PC.
 //!
-//! The ones shipped with the launcher are copied there once; after that they
-//! are ordinary files the user can edit (in the editor tab or by hand). A
+//! The builders shipped with the launcher are copied there once; after that
+//! they are ordinary files the user can edit (in the editor tab or by hand). A
 //! shipped file the user deleted is not brought back, and one they edited is
-//! never overwritten.
+//! never overwritten. Templates are not copied: they are built in (see
+//! `oedvi_common::defaults`) and a file here replaces one.
 
 use std::path::Path;
 
 use oedvi_common::store::Store;
 
 use crate::settings::Layout;
-
-/// `(id, text)` of the templates shipped with the launcher.
-pub const TEMPLATES: &[(&str, &str)] = &[
-    ("victory", include_str!("../../../examples/server/templates/victory.toml")),
-    ("victory-dexnom", include_str!("../../../examples/server/templates/victory-dexnom.toml")),
-];
 
 /// `(id, text)` of the builders shipped with the launcher.
 pub const BUILDERS: &[(&str, &str)] = &[
@@ -60,7 +55,6 @@ fn seed_dir(dir: &Path, files: &[(&str, &str)]) -> std::io::Result<()> {
 
 /// The local builder and template folders, with the shipped files in them.
 pub fn store(layout: &Layout) -> std::io::Result<Store> {
-    seed_dir(&layout.templates, TEMPLATES)?;
     seed_dir(&layout.builders, BUILDERS)?;
     Store::new(layout.builders.clone(), layout.templates.clone())
 }
@@ -73,14 +67,12 @@ mod tests {
     #[test]
     fn shipped_files_are_all_embedded() {
         let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/server");
-        for (sub, embedded) in [("templates", TEMPLATES), ("builders", BUILDERS)] {
-            let on_disk = std::fs::read_dir(dir.join(sub))
-                .unwrap()
-                .flatten()
-                .filter(|e| e.path().extension().is_some_and(|x| x == "toml"))
-                .count();
-            assert_eq!(on_disk, embedded.len(), "{sub}: add the new file to local.rs");
-        }
+        let on_disk = std::fs::read_dir(dir.join("builders"))
+            .unwrap()
+            .flatten()
+            .filter(|e| e.path().extension().is_some_and(|x| x == "toml"))
+            .count();
+        assert_eq!(on_disk, BUILDERS.len(), "add the new builder file to local.rs");
     }
 
     #[test]

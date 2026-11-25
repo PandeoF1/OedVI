@@ -62,6 +62,12 @@ impl Store {
 
     pub fn read_all(&self, kind: Kind) -> std::io::Result<BTreeMap<String, String>> {
         let mut out = BTreeMap::new();
+        // The built-in templates, which a file of the same id replaces.
+        if kind == Kind::Template {
+            for (id, text) in crate::defaults::TEMPLATES {
+                out.insert((*id).to_string(), (*text).to_string());
+            }
+        }
         for entry in std::fs::read_dir(self.dir(kind))? {
             let path = entry?.path();
             if path.extension().and_then(|e| e.to_str()) != Some("toml") {
@@ -88,7 +94,9 @@ impl Store {
         let path = self.dir(kind).join(format!("{id}.toml"));
         match std::fs::read_to_string(&path) {
             Ok(t) => Ok(Some(t)),
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                Ok(if kind == Kind::Template { crate::defaults::template(id).map(String::from) } else { None })
+            }
             Err(e) => Err(e.to_string()),
         }
     }
@@ -127,7 +135,11 @@ impl Store {
         if !is_valid_id(id) {
             return Err("invalid id".into());
         }
-        self.to_trash(kind, id, true).map_err(|e| e.to_string())
+        let removed = self.to_trash(kind, id, true).map_err(|e| e.to_string())?;
+        if !removed && kind == Kind::Template && crate::defaults::template(id).is_some() {
+            return Err("built-in template: it cannot be deleted (save a file with the same id to replace it)".into());
+        }
+        Ok(removed)
     }
 
     /// Keeps a copy of the current file in `.trash/`; moves it there when

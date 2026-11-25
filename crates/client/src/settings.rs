@@ -40,6 +40,9 @@ pub struct Settings {
     pub auto_install_tools: bool,
     /// Extra environment per builder id, applied when the game runs.
     pub builder_env: BTreeMap<String, BTreeMap<String, String>>,
+    /// The branch, tag or commit chosen on this PC for a repository, by
+    /// checkout name. It replaces the `ref` of every builder of that clone.
+    pub ref_overrides: BTreeMap<String, String>,
     /// Name of this PC in the performance comparison.
     pub machine_name: String,
     /// Send the FPS of each run to the server, to compare with the others.
@@ -66,6 +69,7 @@ impl Default for Settings {
             delete_extra: true,
             auto_install_tools: true,
             builder_env: BTreeMap::new(),
+            ref_overrides: BTreeMap::new(),
             machine_name: default_machine_name(),
             share_stats: true,
         }
@@ -93,6 +97,13 @@ impl Settings {
             std::fs::create_dir_all(dir)?;
         }
         crate::state::write_json(path, self)
+    }
+
+    /// Puts the ref chosen on this PC for the builder's clone, if any.
+    pub fn apply_ref_override(&self, def: &mut oedvi_common::BuilderDef) {
+        if let Some(r) = self.ref_overrides.get(def.checkout_key()).filter(|r| !r.trim().is_empty()) {
+            def.git_ref = r.clone();
+        }
     }
 
     pub fn layout(&self) -> Layout {

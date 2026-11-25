@@ -152,7 +152,7 @@ pub async fn build(
 ) -> anyhow::Result<()> {
     ensure_tools(&p.def, install_tools, &sink, cancel).await?;
     if !git::is_cloned(&p.checkout_dir) {
-        sink(Stream::Info, &format!("Clonage de {} ({})", p.def.repo, p.def.git_ref));
+        sink(Stream::Info, &format!("Cloning {} ({})", p.def.repo, p.def.git_ref));
         git::clone(&p.def.repo, &p.def.git_ref, &p.checkout_dir, &sink, cancel).await?;
     }
     let head = git::head(&p.checkout_dir).await?;
