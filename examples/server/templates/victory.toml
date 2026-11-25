@@ -43,3 +43,5 @@ VICTORY_DATA_DIR = "{data_dir}"
 "2 World (core_restofworld)" = 'file opened path="[A-Za-z]:.{1,4}pack.{1,4}core_restofworld001'
 "3 Shared minigame" = 'file opened path="[A-Za-z]:.{1,4}pack.{1,4}shared_minigame000\\'
 "4 Story 000" = 'file opened path="[A-Za-z]:.{1,4}pack.{1,4}story000\\'
+"5 Loading (first decoration bake)" = 'decoration bake.*bakes=1 '
+"6 In game (save loaded)" = 'committed local game save container=Player'
