@@ -1,0 +1,7 @@
+extends = "victory"
+name = "AMD · Release Series S"
+tags = ["victory", "amd", "release", "series-s"]
+order = 20
+
+[vars]
+console = "series-s"

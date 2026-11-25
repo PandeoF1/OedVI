@@ -1,0 +1,8 @@
+/target
+node_modules/
+/launcher/dist/
+/launcher/src-tauri/gen/
+.env
+*.key
+.trash/
+launcher/src-tauri/tauri.release.local.conf.json

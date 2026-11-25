@@ -1,0 +1,14 @@
+extends = "victory"
+name = "AMD · Diag"
+description = "As in the fork's README: diagnostics build, 1x1 present target, hair."
+tags = ["victory", "amd", "diag"]
+order = 10
+
+[vars]
+profile = "diag"
+cargo_flags = "--features diagnostics"
+
+# At launch only: the build stays shared with the other diag variants.
+[run_env]
+VICTORY_PRESENT_TARGET = "1x1:1"
+VICTORY_HAIR = "1"

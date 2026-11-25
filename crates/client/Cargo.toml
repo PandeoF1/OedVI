@@ -1,0 +1,35 @@
+[package]
+name = "oedvi-client"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+oedvi-common.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+regex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+tracing.workspace = true
+reqwest.workspace = true
+futures-util.workspace = true
+blake3.workspace = true
+hex.workspace = true
+walkdir.workspace = true
+dirs = "6"
+sysinfo = { version = "0.40", default-features = false, features = ["system"] }
+which = "7"
+fs4 = "0.13"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.55"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+tempfile.workspace = true
+toml.workspace = true

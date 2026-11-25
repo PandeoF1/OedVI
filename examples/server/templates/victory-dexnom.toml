@@ -1,0 +1,22 @@
+# DexNom fork (DexNom Runtime). Same CLI as VIctory, but:
+# - the repository does not include the BCPack tables: their script downloads
+#   them (from a pinned commit of Marvisak/VIctory) and checks the SHA-256
+#   avant la compilation ;
+# - leur Setup.cmd compile toujours avec `--features diagnostics` et lance
+#   le jeu avec `--unimplemented trap` et le HUD de debug.
+extends = "victory"
+repo = "https://github.com/DexNom/VIctory"
+checkout = "victory-dexnom"
+tags = ["victory", "dexnom"]
+
+build = [
+  ["powershell", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "{repo_dir}/Initialize-FormatTables.ps1"],
+  ["cargo", "build", "--locked", "--profile", "{profile}", "-p", "victory", "{cargo_flags...}"],
+]
+
+[vars]
+cargo_flags = "--features diagnostics"
+run_flags = "--unimplemented trap"
+
+[run_env]
+VICTORY_DEBUG_HUD = "1"

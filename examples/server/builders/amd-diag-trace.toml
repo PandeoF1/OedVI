@@ -1,0 +1,8 @@
+extends = "amd-diag"
+name = "AMD · Diag + logs loader + timing GPU"
+tags = ["victory", "amd", "diag", "debug"]
+order = 12
+
+[run_env]
+VICTORY_LOG = "victory_loader=trace,info"
+VICTORY_GPU_TIMING = "1"

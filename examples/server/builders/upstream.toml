@@ -1,0 +1,8 @@
+# The original VIctory, in a separate clone.
+extends = "victory"
+name = "Upstream · Release"
+description = "Marvisak/VIctory, branche main."
+repo = "https://github.com/Marvisak/VIctory"
+checkout = "victory-upstream"
+tags = ["victory", "upstream", "release"]
+order = 100

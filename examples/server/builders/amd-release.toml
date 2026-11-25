@@ -1,0 +1,5 @@
+extends = "victory"
+name = "AMD · Release"
+description = "Build release du fork AMD, sans outils de diagnostic."
+tags = ["victory", "amd", "release"]
+order = 0

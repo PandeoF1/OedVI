@@ -1,0 +1,28 @@
+# docker compose up -d --build   (from this folder)
+#
+# Put your tokens in a .env file next to it:
+#   OEDVI_TOKEN=...          (read)
+#   OEDVI_ADMIN_TOKEN=...    (edit builders, publish launcher builds)
+#   GAME_DIR=/path/to/the/game
+services:
+  oedvi:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    ports:
+      # Behind a VPN, or with an IP allow-list on your router: bind it to the
+      # VPN address instead, e.g. "100.x.y.z:7878:7878".
+      - "127.0.0.1:7878:7878"
+    environment:
+      OEDVI_TOKEN: ${OEDVI_TOKEN:?set OEDVI_TOKEN in .env}
+      OEDVI_ADMIN_TOKEN: ${OEDVI_ADMIN_TOKEN:-}
+      RUST_LOG: info
+    volumes:
+      - ${GAME_DIR:?set GAME_DIR in .env}:/srv/game:ro
+      - ./oedvi-server.toml:/etc/oedvi/oedvi-server.toml:ro
+      # Hash index, manifest, builders/, templates/, launcher/, stats/
+      - oedvi-data:/var/lib/oedvi
+
+volumes:
+  oedvi-data:

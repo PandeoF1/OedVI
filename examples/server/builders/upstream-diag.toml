@@ -1,0 +1,9 @@
+extends = "upstream"
+name = "Upstream · Diag"
+description = "Marvisak/VIctory en build diagnostics (logs debug, captures)."
+tags = ["victory", "upstream", "diag"]
+order = 110
+
+[vars]
+profile = "diag"
+cargo_flags = "--features diagnostics"

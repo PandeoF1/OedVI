@@ -1,0 +1,5 @@
+extends = "victory-dexnom"
+name = "DexNom · Release"
+description = "DexNom/VIctory, the settings of their Setup.cmd (release + diagnostics, HUD)."
+tags = ["victory", "dexnom", "release"]
+order = 200

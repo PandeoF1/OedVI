@@ -1,0 +1,9 @@
+# Same build as amd-diag, rendered on the software adapter (slow, but it cannot
+# crash the graphics driver).
+extends = "amd-diag"
+name = "AMD · Diag WARP (no GPU)"
+tags = ["victory", "amd", "diag", "debug"]
+order = 11
+
+[run_env]
+VICTORY_D3D12_WARP = "1"

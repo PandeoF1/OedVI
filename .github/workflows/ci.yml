@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+# Where the jobs run is a repository variable (Settings → Secrets and
+# variables → Actions → Variables), so a self-hosted runner needs no edit
+# here. Each one is a JSON list of labels:
+#   RUNNER_LINUX   default ["ubuntu-latest"]    e.g. ["self-hosted","linux"]
+#   RUNNER_WINDOWS default ["windows-latest"]    e.g. ["self-hosted","windows"]
+# See docs/CI.md for what a self-hosted runner needs installed.
+
+jobs:
+  check:
+    name: Lint and tests
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["ubuntu-latest"]') }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Tauri system dependencies
+        # A self-hosted runner has them installed once, by hand.
+        if: ${{ !contains(runner.labels, 'self-hosted') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: launcher/package-lock.json
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Frontend (type check, translations, build)
+        working-directory: launcher
+        run: |
+          npm ci
+          npm run check
+          npm run build
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --workspace
+
+  server:
+    name: oedvi-server and CLI (Linux)
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["ubuntu-latest"]') }}
+    needs: check
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release -p oedvi-server -p oedvi-cli
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oedvi-server-linux-x64
+          path: |
+            target/release/oedvi-server
+            target/release/oedvi
+      - name: Docker image
+        run: docker build -f deploy/Dockerfile -t oedvi-server:ci .
+
+  launcher:
+    name: Launcher (Windows, unsigned)
+    runs-on: ${{ fromJSON(vars.RUNNER_WINDOWS || '["windows-latest"]') }}
+    needs: check
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: launcher/package-lock.json
+      - name: Build
+        working-directory: launcher
+        shell: bash
+        run: |
+          npm ci
+          npx tauri build --bundles nsis
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oedvi-launcher-windows
+          path: target/release/bundle/nsis/*

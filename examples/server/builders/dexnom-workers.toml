@@ -1,0 +1,10 @@
+# The “CPU submission workers” test of their README.
+extends = "dexnom-release"
+name = "DexNom · 4 workers CPU"
+description = "Uploads spread over 4 workers and command list preludes in parallel."
+tags = ["victory", "dexnom", "perf"]
+order = 220
+
+[run_env]
+VICTORY_FILL_WORKERS = "4"
+VICTORY_PARALLEL_PRELUDES = "1"

@@ -1,0 +1,59 @@
+# oedvi-server configuration. Relative paths start from this file.
+
+bind = "0.0.0.0:7878"
+
+# The folder with the files to publish (the game). The server only reads it.
+game_dir = "/srv/game"
+
+# Hash index, manifest, and by default builders/, templates/ and launcher/.
+data_dir = "/var/lib/oedvi"
+# builders_dir = "/etc/oedvi/builders"
+# templates_dir = "/etc/oedvi/templates"
+
+# Prefer the OEDVI_TOKEN / OEDVI_ADMIN_TOKEN environment variables.
+# token: read (download, list, report performance); admin_token: write (edit
+# builders, trigger a rescan, publish launcher builds). Without admin_token,
+# token can do everything.
+token = ""
+admin_token = ""
+
+# Chunk size: only the chunks that changed are downloaded again.
+chunk_size_mib = 32
+# Files hashed in parallel: 1 for a hard disk, 2-4 for an SSD/NVMe.
+hash_jobs = 1
+
+# Rescan after the game folder changed (once quiet for watch_debounce_secs);
+# rescan_interval_mins on top of that for network shares.
+watch = true
+watch_debounce_secs = 15
+rescan_interval_mins = 0
+
+ignore = ["**/Thumbs.db", "**/desktop.ini", "**/.DS_Store", "**/*.tmp", "**/*.oedvi-part", "**/.git/**"]
+
+# Groups shown in the launcher. The first group that matches wins; `*` does
+# not cross folders, `**` does; case is ignored. Adapt the patterns to the
+# layout of your files. A `required` group cannot be unticked.
+default_group = "other"
+
+[[groups]]
+name = "core"
+label = "Core files"
+patterns = ["*.exe", "*.dll", "*.json", "*.xml", "*.config"]
+required = true
+
+[[groups]]
+name = "videos"
+label = "Videos"
+patterns = ["movies/**", "**/*.bk2"]
+
+[[groups]]
+name = "audio"
+label = "Audio"
+patterns = ["audio/**"]
+
+# Any file that matches nothing else.
+[[groups]]
+name = "other"
+label = "Other"
+patterns = ["**"]
+required = true

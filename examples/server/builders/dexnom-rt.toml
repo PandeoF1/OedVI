@@ -1,0 +1,12 @@
+# Same as the “DexNom Runtime (Experimental RT)” shortcut / `victory-play --rt`.
+extends = "dexnom-release"
+name = "DexNom · Experimental ray tracing"
+description = "BVH builder, rays and RT lighting resolve enabled. Slow (frames of several seconds are possible)."
+tags = ["victory", "dexnom", "rt"]
+order = 210
+
+[run_env]
+VICTORY_BVH_BUILDER = "1"
+VICTORY_BVH_QUARANTINE = "0"
+VICTORY_ACTIVATE_RAYS = "1"
+VICTORY_RT_RESOLVE = "1"

@@ -1,0 +1,45 @@
+# Common base of the VIctory forks (Rust, Windows x64 / MSVC).
+# Builders `extends = "victory"` and only change what differs.
+#
+# Needed on the PC: git, rustup (the Rust version is pinned by the repository's
+# rust-toolchain.toml and installed by itself) and Visual Studio Build Tools
+# ("Desktop development with C++") for the MSVC linker. The launcher installs
+# the missing ones by itself.
+stack = "rust"
+repo = "https://github.com/Belobug/VIctory-Belobug-AMD"
+ref = "main"
+tags = ["victory"]
+# One clone (and one target/ folder) for all the builders of the fork.
+checkout = "victory-amd"
+
+build = [["cargo", "build", "--locked", "--profile", "{profile}", "-p", "victory", "{cargo_flags...}"]]
+run = [
+  "{repo_dir}/target/{profile_dir}/victory{exe_suffix}",
+  "run", "{game_dir}/{game_exe}", "--execute", "--console", "{console}", "{run_flags...}",
+]
+
+[vars]
+profile = "release"
+# Cargo output folder: `release`, `diag`… but `debug` for the `dev` profile.
+profile_dir = "{profile}"
+cargo_flags = ""
+game_exe = "game_scarlett_master.exe"
+console = "series-x"
+run_flags = ""
+
+# VIctory refuses to write its caches inside the repository: the launcher gives
+# it folders of its own (one cache per clone, shared saves).
+[env]
+VICTORY_GAME_DIR = "{game_dir}"
+VICTORY_CACHE_DIR = "{cache_dir}"
+VICTORY_DATA_DIR = "{data_dir}"
+
+# Phases of the game, found in its output (one regex per phase: the last line
+# that matches starts the phase). They show as bands on the charts and in the
+# per-phase stats. The names are free: rename them. Here they are the packs
+# the game opens, in order (the same on every launch in our logs).
+[phases]
+"1 Licenses" = 'file opened path="G:.{1,4}pack.{1,4}core_licenses'
+"2 World (core_restofworld)" = 'file opened path="G:.{1,4}pack.{1,4}core_restofworld001'
+"3 Shared minigame" = 'file opened path="G:.{1,4}pack.{1,4}shared_minigame000\\'
+"4 Story 000" = 'file opened path="G:.{1,4}pack.{1,4}story000\\'

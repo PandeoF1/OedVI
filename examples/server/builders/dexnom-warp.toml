@@ -1,0 +1,8 @@
+# Software rendering (WARP): to tell whether a bug comes from the GPU driver.
+extends = "dexnom-release"
+name = "DexNom · WARP (software rendering)"
+tags = ["victory", "dexnom", "debug"]
+order = 230
+
+[run_env]
+VICTORY_D3D12_WARP = "1"

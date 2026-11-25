@@ -1,0 +1,105 @@
+name: Release
+
+# Push a tag `vX.Y.Z` (the version in launcher/src-tauri/tauri.conf.json) to
+# publish a GitHub release with the signed Windows installer, the files the
+# in-app updater reads (latest.json) and the Linux server and CLI binaries.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+# Runner variables: see ci.yml and docs/CI.md.
+jobs:
+  launcher:
+    name: Signed Windows installer
+    runs-on: ${{ fromJSON(vars.RUNNER_WINDOWS || '["windows-latest"]') }}
+    env:
+      # Repository secrets (docs/CI.md). The key is yours: generate it with
+      # `npx tauri signer generate`. Without it the release cannot be built,
+      # since an unsigned installer could not be installed by the updater.
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      OEDVI_UPDATER_PUBKEY: ${{ secrets.OEDVI_UPDATER_PUBKEY }}
+      # Standalone launchers look for updates here.
+      OEDVI_UPDATE_URL: https://github.com/${{ github.repository }}/releases/latest/download/latest.json
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check the signing secrets
+        shell: bash
+        run: |
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ] || [ -z "$OEDVI_UPDATER_PUBKEY" ]; then
+            echo "::error::Set the TAURI_SIGNING_PRIVATE_KEY and OEDVI_UPDATER_PUBKEY secrets (see docs/CI.md)."
+            exit 1
+          fi
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: launcher/package-lock.json
+      - name: Build and sign
+        working-directory: launcher
+        shell: bash
+        run: |
+          npm ci
+          node scripts/release-config.mjs
+          npx tauri build --bundles nsis --config src-tauri/tauri.release.local.conf.json
+      - name: Write latest.json
+        shell: bash
+        run: node launcher/scripts/make-latest-json.mjs target/release/bundle/nsis "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: launcher
+          path: |
+            target/release/bundle/nsis/*_x64-setup.exe
+            target/release/bundle/nsis/*_x64-setup.exe.sig
+            target/release/bundle/nsis/latest.json
+
+  server:
+    name: Server and CLI (Linux)
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["ubuntu-latest"]') }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release -p oedvi-server -p oedvi-cli
+      - name: Package
+        run: tar -C target/release -czf oedvi-linux-x64.tar.gz oedvi-server oedvi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: server
+          path: oedvi-linux-x64.tar.gz
+
+  publish:
+    name: GitHub release
+    needs: [launcher, server]
+    runs-on: ${{ fromJSON(vars.RUNNER_LINUX || '["ubuntu-latest"]') }}
+    env:
+      OEDVI_SERVER_URL: ${{ secrets.OEDVI_SERVER_URL }}
+      OEDVI_ADMIN_TOKEN: ${{ secrets.OEDVI_ADMIN_TOKEN }}
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: dist/*
+          generate_release_notes: true
+      - name: Publish to your OedVI server (optional)
+        # Only when the OEDVI_SERVER_URL and OEDVI_ADMIN_TOKEN secrets exist.
+        if: ${{ startsWith(github.ref, 'refs/tags/v') && env.OEDVI_SERVER_URL != '' }}
+        run: |
+          cd dist
+          for f in *_x64-setup.exe *_x64-setup.exe.sig; do
+            curl -fsS -X PUT -H "Authorization: Bearer $OEDVI_ADMIN_TOKEN" \
+              --data-binary @"$f" "$OEDVI_SERVER_URL/api/launcher/files/$f"
+          done
