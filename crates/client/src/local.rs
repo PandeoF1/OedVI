@@ -26,6 +26,7 @@ pub const BUILDERS: &[(&str, &str)] = &[
     ("xtx7900", include_str!("../../../examples/server/builders/xtx7900.toml")),
     ("nvidia", include_str!("../../../examples/server/builders/nvidia.toml")),
     ("coolfox", include_str!("../../../examples/server/builders/coolfox.toml")),
+    ("kelvaroq", include_str!("../../../examples/server/builders/kelvaroq.toml")),
     ("upstream", include_str!("../../../examples/server/builders/upstream.toml")),
     ("upstream-diag", include_str!("../../../examples/server/builders/upstream-diag.toml")),
 ];

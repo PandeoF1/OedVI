@@ -1,0 +1,19 @@
+# Kelvaroq (stellarr-studio): the engine only, built by the repository's own
+# script, which fetches fxceless/victory-fork at a pinned revision and applies
+# its patches. The repository's launcher and its prebuilt ZIP are not used.
+# Needs Python 3.11+ on top of the usual tools (the launcher installs it).
+extends = "victory"
+name = "Kelvaroq · Engine (Series X)"
+description = "stellarr-studio/kelvaroq, pinned to a commit read in advance."
+repo = "https://github.com/stellarr-studio/kelvaroq"
+ref = "e062a82e04853bbcae281d166980e0a9b65c975a"
+checkout = "kelvaroq"
+tags = ["victory", "kelvaroq", "release", "nvidia"]
+requires = ["python"]
+order = 80
+
+build = [["python", "scripts/build_native.py"]]
+run = [
+  "{repo_dir}/target/release/native/kelvaroq-engine{exe_suffix}",
+  "run", "{game_dir}/{game_exe}", "--console", "{console}", "--execute", "{run_flags...}",
+]
