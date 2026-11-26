@@ -1,0 +1,38 @@
+# codec_d's fork (RTX-tested residency settings, Series S), in its own clone.
+# The README of this fork tells you to download a prebuilt ZIP: don't, this
+# builder compiles the source. The source of this commit was read before it
+# was pinned here (no network, process or registry code added over the AMD
+# fork it is based on); change `ref` to follow the branch (`main`) at your
+# own risk, and read what changed first.
+extends = "victory"
+name = "cool_fox · Release Series S"
+description = "codec-d/cool_fox, pinned to a reviewed commit."
+repo = "https://git.gtahub.st/github/codec-d--cool_fox"
+ref = "f4b48ad766ddbec1a1867022cd42f7645b0dd55e"
+checkout = "victory-coolfox"
+tags = ["victory", "coolfox", "release", "series-s"]
+order = 70
+
+[vars]
+console = "series-s"
+
+[run_env]
+VICTORY_AMBIENT_AIR = "1.5"
+VICTORY_TEXTURE_NO_WAIT = "1"
+VICTORY_RELAY = "2"
+VICTORY_WIDE_BACK = "1"
+VICTORY_CARD_REHASH_RUNS = "1"
+VICTORY_JOIN_COPIES = "1"
+VICTORY_INDIRECT_WINDOW = "1"
+VICTORY_RELAY_COPY = "1"
+VICTORY_CARD_STEPS = "2"
+VICTORY_INDIRECT_BATCH = "2"
+VICTORY_MAP_THREADS = "1"
+VICTORY_CARD_AWAKE = "1"
+VICTORY_SHOW_AFTER = "1"
+VICTORY_AMBIENT = "0.8"
+VICTORY_THIN = "1"
+VICTORY_JOIN_PARTS = "8"
+VICTORY_UPLOAD_AHEAD = "1"
+VICTORY_LEVELS_ON_DEMAND = "1"
+VICTORY_CARD_BUFFERS_MIN_KB = "64"
