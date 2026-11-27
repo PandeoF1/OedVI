@@ -249,6 +249,62 @@ fn open_path(app: AppHandle, path: PathBuf) -> CmdResult<()> {
     app.opener().open_path(path.to_string_lossy(), None::<&str>).map_err(err)
 }
 
+// ----------------------------------------------------------------- backups
+
+#[derive(Serialize)]
+struct BackupsView {
+    dir: PathBuf,
+    /// What gets saved: the folder the games keep their saves in.
+    data: PathBuf,
+    backups: Vec<oedvi_client::backup::Backup>,
+}
+
+fn backups_dir(settings: &Settings) -> PathBuf {
+    oedvi_client::backup::dir_of(&settings.layout().root)
+}
+
+#[tauri::command]
+fn backups_list(state: State<AppState>) -> BackupsView {
+    let settings = state.settings();
+    let dir = backups_dir(&settings);
+    BackupsView { backups: oedvi_client::backup::list(&dir), data: settings.layout().data, dir }
+}
+
+#[tauri::command]
+async fn backup_create(state: State<'_, AppState>, label: String) -> CmdResult<oedvi_client::backup::Backup> {
+    let settings = state.settings();
+    let (data, dir) = (settings.layout().data, backups_dir(&settings));
+    tokio::task::spawn_blocking(move || oedvi_client::backup::create(&data, &dir, &label, false))
+        .await
+        .map_err(err)?
+        .map_err(anyerr)?
+        .ok_or_else(|| "there is nothing to save yet: the game has not written any save".to_string())
+}
+
+#[tauri::command]
+async fn backup_verify(state: State<'_, AppState>, id: String) -> CmdResult<Vec<String>> {
+    let dir = backups_dir(&state.settings());
+    tokio::task::spawn_blocking(move || oedvi_client::backup::verify(&dir, &id)).await.map_err(err)?.map_err(anyerr)
+}
+
+#[tauri::command]
+async fn backup_restore(state: State<'_, AppState>, id: String) -> CmdResult<()> {
+    if state.tasks.any_running(TaskKind::Run) {
+        return Err("close the game before restoring a backup".into());
+    }
+    let settings = state.settings();
+    let (data, dir) = (settings.layout().data, backups_dir(&settings));
+    tokio::task::spawn_blocking(move || oedvi_client::backup::restore(&data, &dir, &id))
+        .await
+        .map_err(err)?
+        .map_err(anyerr)
+}
+
+#[tauri::command]
+fn backup_delete(state: State<AppState>, id: String) -> CmdResult<()> {
+    oedvi_client::backup::delete(&backups_dir(&state.settings()), &id).map_err(anyerr)
+}
+
 // ------------------------------------------------------------------ server
 
 #[derive(Serialize)]
@@ -737,6 +793,24 @@ async fn builder_action(app: AppHandle, state: State<'_, AppState>, id: String, 
                             sink(stream, line)
                         })
                     };
+                    if settings.backup_before_play {
+                        let (data, dir, keep) =
+                            (settings.layout().data, backups_dir(&settings), settings.backup_keep.max(1));
+                        let made = tokio::task::spawn_blocking(move || {
+                            let r = oedvi_client::backup::create(&data, &dir, "before play", true);
+                            oedvi_client::backup::prune(&dir, keep);
+                            r
+                        })
+                        .await?;
+                        match made {
+                            Ok(Some(b)) => sink(
+                                oedvi_client::process::Stream::Info,
+                                &format!("saves backed up ({} files)", b.files.len()),
+                            ),
+                            Ok(None) => {}
+                            Err(e) => sink(oedvi_client::process::Stream::Info, &format!("backup skipped: {e:#}")),
+                        }
+                    }
                     let commit = git::head(&dir).await.unwrap_or_default();
                     let running = builder::launch(&prepared, game_sink)?;
                     let pid = running.pid;
@@ -899,6 +973,11 @@ pub fn run() {
             get_settings,
             save_settings,
             open_path,
+            backups_list,
+            backup_create,
+            backup_verify,
+            backup_restore,
+            backup_delete,
             server_info,
             server_rescan,
             refresh_manifest,

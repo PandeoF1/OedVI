@@ -14,6 +14,8 @@ export interface Settings {
   ref_overrides: Record<string, string>;
   machine_name: string;
   share_stats: boolean;
+  backup_before_play: boolean;
+  backup_keep: number;
 }
 
 export interface PerfSession {
@@ -112,6 +114,21 @@ export interface Layout {
   data: string;
   state: string;
   logs: string;
+}
+
+export interface Backup {
+  id: string;
+  created_at: number;
+  label: string;
+  auto: boolean;
+  files: { path: string; size: number; hash: string }[];
+  bytes: number;
+}
+
+export interface BackupsView {
+  dir: string;
+  data: string;
+  backups: Backup[];
 }
 
 export interface SettingsView {
@@ -395,6 +412,11 @@ export const api = {
   cancelSync: () => invoke<void>("cancel_sync"),
   syncProgress: () => invoke<ProgressSnapshot | null>("sync_progress"),
   listBuilders: (refresh: boolean) => invoke<BuilderListView>("list_builders", { refresh }),
+  backupsList: () => invoke<BackupsView>("backups_list"),
+  backupCreate: (label: string) => invoke<Backup>("backup_create", { label }),
+  backupVerify: (id: string) => invoke<string[]>("backup_verify", { id }),
+  backupRestore: (id: string) => invoke<void>("backup_restore", { id }),
+  backupDelete: (id: string) => invoke<void>("backup_delete", { id }),
   gameFolderInfo: () => invoke<{ path: string; exists: boolean; entries: number }>("game_folder_info"),
   markPhase: (id: string, name: string) => invoke<void>("mark_phase", { id, name }),
   repoRefs: (id: string) => invoke<RepoRefs>("repo_refs", { id }),

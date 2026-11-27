@@ -17,7 +17,7 @@ import { initLive, resetLive } from "./live.svelte";
 import { t } from "./i18n.svelte";
 import { toast } from "./toast.svelte";
 
-export type Page = "game" | "builders" | "stats" | "editor" | "settings";
+export type Page = "game" | "builders" | "stats" | "backups" | "editor" | "settings";
 
 export const app = $state({
   page: "game" as Page,

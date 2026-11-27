@@ -11,6 +11,7 @@
   import EditorPage from "./components/EditorPage.svelte";
   import SettingsPage from "./components/SettingsPage.svelte";
   import StatsPage from "./components/StatsPage.svelte";
+  import BackupsPage from "./components/BackupsPage.svelte";
 
   onMount(() => {
     init();
@@ -20,6 +21,7 @@
     { id: "game", label: t("Game"), icon: "gamepad" },
     { id: "builders", label: t("Builders"), icon: "hammer" },
     { id: "stats", label: t("Stats"), icon: "chart" },
+    { id: "backups", label: t("Backups"), icon: "save" },
     { id: "editor", label: t("Editor"), icon: "code" },
     { id: "settings", label: t("Settings"), icon: "settings" },
   ]);
@@ -110,6 +112,8 @@
       <BuildersPage />
     {:else if app.page === "stats"}
       <StatsPage />
+    {:else if app.page === "backups"}
+      <BackupsPage />
     {:else if app.page === "editor"}
       <EditorPage />
     {:else}

@@ -47,6 +47,10 @@ pub struct Settings {
     pub machine_name: String,
     /// Send the FPS of each run to the server, to compare with the others.
     pub share_stats: bool,
+    /// Save the game's saves before each game start.
+    pub backup_before_play: bool,
+    /// Automatic backups kept (those made by hand are never removed).
+    pub backup_keep: usize,
 }
 
 fn default_machine_name() -> String {
@@ -72,6 +76,8 @@ impl Default for Settings {
             ref_overrides: BTreeMap::new(),
             machine_name: default_machine_name(),
             share_stats: true,
+            backup_before_play: true,
+            backup_keep: 10,
         }
     }
 }

@@ -3,6 +3,7 @@
 //! builders. The CLI (`oedvi`) and the Tauri launcher are thin layers on top.
 
 pub mod api;
+pub mod backup;
 pub mod builder;
 pub mod git;
 pub mod local;
