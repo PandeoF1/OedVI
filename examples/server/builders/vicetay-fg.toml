@@ -3,7 +3,8 @@
 # 44.9 presented.
 # The AMD FidelityFX DLLs are fetched by the build: a sparse clone of AMD's own
 # FidelityFX-SDK (GPUOpen-LibrariesAndSDKs, tag v2.4.0, commit checked) into
-# the cache, Kits/FidelityFX/signedbin only (about 170 MB). Nothing happens
+# the cache, Kits/FidelityFX/signedbin only (about 170 MB). Likewise NVIDIA's
+# own DLSS repository (tag v310.9.16, commit checked) gives nvngx_dlss.dll. Nothing happens
 # when they are already there. They are AMD's signed files under AMD's licence.
 # OedVI's fps are the rendered frames, not the presented ones: the panel's
 # "FG OUTPUT FPS" and the window title tell the presented count.
@@ -16,9 +17,11 @@ order = 92
 build = [
   ["cargo", "build", "--locked", "--profile", "{profile}", "-p", "victory", "{cargo_flags...}"],
   ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference = 'Stop'; $d = '{cache_dir}/ffx-sdk'; $b = 'Kits/FidelityFX/signedbin'; if (-not (Test-Path \"$d/$b/amd_fidelityfx_framegeneration_dx12.dll\")) {{ if (Test-Path $d) {{ Remove-Item -Recurse -Force $d }}; git clone --quiet --depth 1 --branch v2.4.0 --filter=blob:none --sparse https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK $d; if ($LASTEXITCODE) {{ throw 'clone failed' }}; git -C $d sparse-checkout set $b; if ($LASTEXITCODE) {{ throw 'sparse-checkout failed' }}; if ((git -C $d rev-parse HEAD) -ne '7539ae8b6568ad29ed78a753404351daf3b5cca7') {{ throw 'unexpected SDK commit' }} }}"],
+  ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference = 'Stop'; $d = '{cache_dir}/dlss-sdk'; $b = 'lib/Windows_x86_64/rel'; if (-not (Test-Path \"$d/$b/nvngx_dlss.dll\")) {{ if (Test-Path $d) {{ Remove-Item -Recurse -Force $d }}; git clone --quiet --depth 1 --branch v310.9.16 --filter=blob:none --sparse https://github.com/NVIDIA/DLSS $d; if ($LASTEXITCODE) {{ throw 'clone failed' }}; git -C $d sparse-checkout set $b; if ($LASTEXITCODE) {{ throw 'sparse-checkout failed' }}; if ((git -C $d rev-parse HEAD) -ne '9981c6350dc58c0ce21f024fd65e31e851c31689') {{ throw 'unexpected SDK commit' }} }}"],
 ]
 
 [run_env]
+VICTORY_DLSS_DIR = "{cache_dir}/dlss-sdk/lib/Windows_x86_64/rel"
 VICTORY_DLSS = "quality"
 VICTORY_FRAMEGEN = "1"
 VICTORY_FFX_FG_DIR = "{cache_dir}/ffx-sdk/Kits/FidelityFX/signedbin"

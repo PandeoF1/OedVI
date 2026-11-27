@@ -1,11 +1,19 @@
 # Vice-Tay, Series S with DLSS Quality (720p scaled to 1080p). Needs a GeForce
-# RTX card. nvngx_dlss.dll comes from the driver, or from VICTORY_DLSS_DIR; the
-# fork checks for it and falls back to FSR (or nothing) when it is missing.
+# RTX card. The fork refuses to start without NVIDIA's nvngx_dlss.dll, so the
+# build fetches it: a sparse clone of NVIDIA's own DLSS repository (tag
+# v310.9.16, commit checked) into the cache, lib/Windows_x86_64/rel only.
+# Nothing happens when it is already there. NVIDIA's file, under NVIDIA's licence.
 extends = "victory-vicetay"
 name = "Vice-Tay · Series S + DLSS Quality"
-description = "Series S, DLSS Quality through NVIDIA NGX. See the template for the optional DLL folders."
+description = "Series S, DLSS Quality through NVIDIA NGX. The build fetches NVIDIA's DLSS DLL."
 tags = ["victory", "vicetay", "diag", "series-s", "dlss"]
 order = 91
 
+build = [
+  ["cargo", "build", "--locked", "--profile", "{profile}", "-p", "victory", "{cargo_flags...}"],
+  ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference = 'Stop'; $d = '{cache_dir}/dlss-sdk'; $b = 'lib/Windows_x86_64/rel'; if (-not (Test-Path \"$d/$b/nvngx_dlss.dll\")) {{ if (Test-Path $d) {{ Remove-Item -Recurse -Force $d }}; git clone --quiet --depth 1 --branch v310.9.16 --filter=blob:none --sparse https://github.com/NVIDIA/DLSS $d; if ($LASTEXITCODE) {{ throw 'clone failed' }}; git -C $d sparse-checkout set $b; if ($LASTEXITCODE) {{ throw 'sparse-checkout failed' }}; if ((git -C $d rev-parse HEAD) -ne '9981c6350dc58c0ce21f024fd65e31e851c31689') {{ throw 'unexpected SDK commit' }} }}"],
+]
+
 [run_env]
+VICTORY_DLSS_DIR = "{cache_dir}/dlss-sdk/lib/Windows_x86_64/rel"
 VICTORY_DLSS = "quality"
