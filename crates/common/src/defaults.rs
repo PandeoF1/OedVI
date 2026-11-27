@@ -6,6 +6,7 @@
 pub const TEMPLATES: &[(&str, &str)] = &[
     ("victory", include_str!("../../../examples/server/templates/victory.toml")),
     ("victory-dexnom", include_str!("../../../examples/server/templates/victory-dexnom.toml")),
+    ("victory-nvidia", include_str!("../../../examples/server/templates/victory-nvidia.toml")),
 ];
 
 pub fn template(id: &str) -> Option<&'static str> {

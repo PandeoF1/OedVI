@@ -1,0 +1,8 @@
+# Same, DLSS Performance (renders at half the resolution): the author's mode 4.
+extends = "nvidia-dlss"
+name = "NVIDIA · DLSS Performance + frame generation"
+description = "Series X 1440p, DLSS Performance, frame generation. Run Get-NVIDIA-DLSS.cmd once."
+order = 63
+
+[run_env]
+VICTORY_DLSS_MODE = "performance"

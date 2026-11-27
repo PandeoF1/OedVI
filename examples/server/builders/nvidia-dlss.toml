@@ -1,20 +1,31 @@
-# The NVIDIA fork with DLSS super resolution and DLSS frame generation
-# (NVIDIA Streamline), switched on. Needs a GeForce RTX card (frame generation:
-# RTX 40 or later), Windows 10 2004+ and hardware-accelerated GPU scheduling.
+# The NVIDIA fork with DLSS Quality and DLSS frame generation (the author's
+# mode 1). Needs a GeForce RTX card (frame generation: RTX 40 or later),
+# Windows 10 2004+ and hardware-accelerated GPU scheduling (Settings >
+# System > Display > Graphics).
 #
-# One-off: NVIDIA's files are not in the repository. After the first build, in
-# the builder's clone folder (the folder icon in the launcher), run
-# Get-NVIDIA-DLSS.cmd. It downloads about 70 MB from NVIDIA's own GitHub
+# One-off: NVIDIA's files are not in the repository. After the first build,
+# open the builder's folder (the folder icon in the launcher) and run
+# Get-NVIDIA-DLSS.cmd: it downloads about 70 MB from NVIDIA's own GitHub
 # (NVIDIA-RTX/Streamline) into nvidia-sdk\. Without them the game still runs
-# with its own upscaling (see docs/dlss.md of the repository).
-extends = "nvidia"
-name = "NVIDIA · DLSS + frame generation"
-description = "DLSS performance mode and 2x frame generation; run Get-NVIDIA-DLSS.cmd once."
-tags = ["victory", "nvidia", "dlss", "series-s"]
+# with its own upscaling.
+#
+# Frame generation asks the driver how many frames the card makes and gives
+# no more: 4 means 4x on an RTX 50 and 2x on an RTX 40.
+extends = "victory-nvidia"
+name = "NVIDIA · DLSS Quality + frame generation"
+description = "Series X 1440p, DLSS Quality, frame generation. Run Get-NVIDIA-DLSS.cmd once."
+tags = ["victory", "nvidia", "dlss", "series-x"]
 order = 61
 
+[vars]
+console = "series-x"
+
 [run_env]
+VICTORY_NATIVE_1440P = "1"
 VICTORY_STREAMLINE_DIR = "{repo_dir}/nvidia-sdk/Streamline/bin/x64"
 VICTORY_DLSS = "1"
-VICTORY_DLSS_MODE = "performance"
+VICTORY_DLSS_MODE = "quality"
 VICTORY_FRAMEGEN = "1"
+VICTORY_FRAMEGEN_X = "4"
+# Frame generation needs 1.5 to 2 GB of the card's memory: leave it a fifth.
+VICTORY_TEXTURE_ROOM_PERCENT = "80"

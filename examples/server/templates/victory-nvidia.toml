@@ -1,0 +1,63 @@
+# trustno1-coder/VIctory-NVIDIA, "foxhound" settings: what scripts/play-foxhound.ps1
+# of the repository sets (tested by the author on an RTX 4070 SUPER). Builders
+# below add the console, the resolution and DLSS.
+#
+# Not set here, because the script picks them from the number of logical CPUs
+# (add them in "Commands and variables" if you want, measured by the author on
+# 16+ CPUs): VICTORY_THIN_THREADS=12, VICTORY_UNDER_THREADS=8,
+# VICTORY_LAND_THREADS=6 (12 with 24+ CPUs).
+# The F1 menu of the game saves to victory-settings.txt, which only the
+# repository's own scripts read, not OedVI: change settings here instead.
+extends = "victory"
+repo = "https://github.com/trustno1-coder/VIctory-NVIDIA"
+checkout = "victory-nvidia"
+tags = ["victory", "nvidia"]
+
+[run_env]
+# Submission and copy machinery
+VICTORY_THIN = "1"
+VICTORY_JOIN_PARTS = "8"
+VICTORY_RELAY = "2"
+VICTORY_RELAY_COPY = "1"
+VICTORY_WIDE_BACK = "1"
+VICTORY_CARD_REHASH_RUNS = "1"
+VICTORY_JOIN_COPIES = "1"
+VICTORY_CARD_STEPS = "2"
+VICTORY_CARD_AWAKE = "1"
+VICTORY_CARD_BUFFERS_MIN_KB = "64"
+VICTORY_INDIRECT_WINDOW = "1"
+VICTORY_INDIRECT_BATCH = "2"
+VICTORY_UPLOAD_AHEAD = "1"
+VICTORY_SHOW_AFTER = "1"
+VICTORY_MAP_THREADS = "1"
+VICTORY_WC_NO_BACK = "1"
+VICTORY_WC_NO_BACK_MIN_KB = "1024"
+VICTORY_SOFT_VIEWS = "copies"
+# Textures
+VICTORY_TEXTURE_POOL = "1"
+VICTORY_RIPE_BLOCKS = "0"
+VICTORY_TEXTURE_NO_WAIT = "1"
+VICTORY_TEXTURE_CATCHUP = "0"
+VICTORY_TEXTURE_STAGE_MS = "16"
+VICTORY_LEVELS_ON_DEMAND = "0"
+VICTORY_PRELUDE_UPLOADS = "1"
+VICTORY_SHOW_NEW_LATER = "1"
+VICTORY_POOL_SMALL = "0"
+VICTORY_TABLED_REREAD = "1"
+VICTORY_QUEUE_HOST_TEXTURES = "0"
+# Descriptor heaps
+VICTORY_HEAP_SYNC_FIRST = "1"
+VICTORY_SYNC_IN_PLACE = "1"
+VICTORY_SPANS_QUICK = "1"
+VICTORY_SYNC_FINE = "1"
+VICTORY_HEAP_SYNC_AT_SUBMIT = "1"
+# Light without the title's ray tracing
+VICTORY_AMBIENT = "0.8"
+VICTORY_AMBIENT_AIR = "1.5"
+VICTORY_AMBIENT_SPECULAR = "1"
+VICTORY_EARLY_DEPTH = "1"
+VICTORY_LEAVE_OUT = "02384a60fda6f2d0,731a39171b568298"
+VICTORY_PIPELINE_BOOK = "1"
+VICTORY_PLACED_ORDER = "1"
+# No frame cap: a frame begins as soon as the last one is done (the script's -Fps 1000).
+VICTORY_FRAME_INTERVAL_US = "1000"

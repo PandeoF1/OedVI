@@ -1,0 +1,9 @@
+# The NVIDIA fork, Series S profile (1280x720 inside): faster, softer.
+extends = "victory-nvidia"
+name = "NVIDIA · Series S"
+description = "Series S profile, foxhound settings, no DLSS."
+tags = ["victory", "nvidia", "release", "series-s"]
+order = 62
+
+[vars]
+console = "series-s"
