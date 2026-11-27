@@ -3060,7 +3060,7 @@ dependencies = [
 
 [[package]]
 name = "oedvi-cli"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -3074,7 +3074,7 @@ dependencies = [
 
 [[package]]
 name = "oedvi-client"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "blake3",
@@ -3102,7 +3102,7 @@ dependencies = [
 
 [[package]]
 name = "oedvi-common"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "blake3",
  "hex",
@@ -3116,7 +3116,7 @@ dependencies = [
 
 [[package]]
 name = "oedvi-launcher"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "oedvi-client",
@@ -3137,7 +3137,7 @@ dependencies = [
 
 [[package]]
 name = "oedvi-server"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "axum",
