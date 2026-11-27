@@ -1,0 +1,11 @@
+# Vice-Tay, Series S with DLSS Quality (720p scaled to 1080p). Needs a GeForce
+# RTX card. nvngx_dlss.dll comes from the driver, or from VICTORY_DLSS_DIR; the
+# fork checks for it and falls back to FSR (or nothing) when it is missing.
+extends = "victory-vicetay"
+name = "Vice-Tay · Series S + DLSS Quality"
+description = "Series S, DLSS Quality through NVIDIA NGX. See the template for the optional DLL folders."
+tags = ["victory", "vicetay", "diag", "series-s", "dlss"]
+order = 91
+
+[run_env]
+VICTORY_DLSS = "quality"

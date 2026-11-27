@@ -30,6 +30,9 @@ pub const BUILDERS: &[(&str, &str)] = &[
     ("nvidia", include_str!("../../../examples/server/builders/nvidia.toml")),
     ("coolfox", include_str!("../../../examples/server/builders/coolfox.toml")),
     ("kelvaroq", include_str!("../../../examples/server/builders/kelvaroq.toml")),
+    ("vicetay", include_str!("../../../examples/server/builders/vicetay.toml")),
+    ("vicetay-dlss", include_str!("../../../examples/server/builders/vicetay-dlss.toml")),
+    ("vicetay-fg", include_str!("../../../examples/server/builders/vicetay-fg.toml")),
     ("upstream", include_str!("../../../examples/server/builders/upstream.toml")),
     ("upstream-diag", include_str!("../../../examples/server/builders/upstream-diag.toml")),
 ];

@@ -1,0 +1,53 @@
+# TaynanGT/Vice-Tay: a VIctory fork tuned on an RTX 4090 (own DLSS through
+# NVIDIA's NGX, AMD frame generation). Common base of the "Vice-Tay" builders.
+#
+# What scripts/play.ps1 of the repository sets on an NVIDIA PC, minus what it
+# picks from the CPU (add them in "Commands and variables" if you want:
+# VICTORY_THIN_THREADS=12, VICTORY_UNDER_THREADS=8, VICTORY_LAND_THREADS=6 on
+# a 16-core CPU; 8, 6 and 4 on an 8-core one).
+# The title sees no network (the fork answers loopback only), and its DLLs are
+# loaded from the driver or the folders below, never from the current folder.
+#
+# Optional files, none of them in the repository (put the folder in
+# "Commands and variables" as an environment variable):
+#   VICTORY_DLSS_DIR     the folder with nvngx_dlss.dll (NVIDIA DLSS SDK)
+#   VICTORY_FFX_FG_DIR   the folder with amd_fidelityfx_loader_dx12.dll and
+#                        amd_fidelityfx_framegeneration_dx12.dll (FidelityFX
+#                        SDK 2.4.0, Kits/FidelityFX/signedbin)
+# Without them the game still runs (DLSS falls back, no frame generation).
+extends = "victory"
+repo = "https://github.com/TaynanGT/Vice-Tay"
+# Read in advance (no network call besides the title's loopback, no download,
+# no registry write; build scripts only fingerprint the sources).
+ref = "a51fb9d17efaa5d786f9cb89b9bde204694c557b"
+checkout = "vicetay"
+tags = ["victory", "vicetay"]
+
+[vars]
+console = "series-s"
+# The development build all the author's measurements are of: release code
+# generation plus the diagnostics panel (F3 hides it while playing).
+profile = "diag"
+cargo_flags = "--features diagnostics"
+
+[run_env]
+VICTORY_TEXTURE_NO_WAIT = "1"
+VICTORY_RELAY = "2"
+VICTORY_WIDE_BACK = "1"
+VICTORY_CARD_REHASH_RUNS = "1"
+VICTORY_JOIN_COPIES = "1"
+VICTORY_INDIRECT_WINDOW = "1"
+VICTORY_RELAY_COPY = "1"
+VICTORY_CARD_STEPS = "2"
+VICTORY_TITLE_PRIORITIES = "0"
+VICTORY_SHOW_AFTER = "1"
+VICTORY_AMBIENT = "0.8"
+VICTORY_D3D12_DRED = "light"
+VICTORY_THIN = "1"
+VICTORY_JOIN_PARTS = "8"
+VICTORY_UPLOAD_AHEAD = "1"
+VICTORY_INDIRECT_BATCH = "2"
+VICTORY_MAP_THREADS = "auto"
+VICTORY_PLACED_ORDER = "1"
+VICTORY_FULLSCREEN = "1"
+VICTORY_PANEL = "1"

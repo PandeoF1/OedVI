@@ -1,0 +1,15 @@
+# Vice-Tay, Series S with DLSS Quality and 2x frame generation (AMD FSR 3.1.6
+# provider, works on any D3D12 card). The author's sample: 22.4 rendered fps,
+# 44.9 presented. Needs VICTORY_FFX_FG_DIR (see the template): add it in
+# "Commands and variables" before the first launch.
+# OedVI's fps are the rendered frames, not the presented ones: the panel's
+# "FG OUTPUT FPS" and the window title tell the presented count.
+extends = "victory-vicetay"
+name = "Vice-Tay · Series S + DLSS + frame generation"
+description = "Series S, DLSS Quality, 2x AMD frame generation. Needs the FidelityFX DLL folder."
+tags = ["victory", "vicetay", "diag", "series-s", "dlss", "frame-generation"]
+order = 92
+
+[run_env]
+VICTORY_DLSS = "quality"
+VICTORY_FRAMEGEN = "1"

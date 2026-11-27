@@ -1,0 +1,7 @@
+# Vice-Tay, Series S profile (the one the author measured: about 21 fps median
+# on an RTX 4090), the title's own upscaling, no DLSS.
+extends = "victory-vicetay"
+name = "Vice-Tay · Series S"
+description = "TaynanGT/Vice-Tay pinned to a reviewed commit, Series S, diagnostics panel."
+tags = ["victory", "vicetay", "diag", "series-s"]
+order = 90
