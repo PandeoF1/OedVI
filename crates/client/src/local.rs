@@ -24,6 +24,7 @@ pub const BUILDERS: &[(&str, &str)] = &[
     ("dexnom-warp", include_str!("../../../examples/server/builders/dexnom-warp.toml")),
     ("dexnom-workers", include_str!("../../../examples/server/builders/dexnom-workers.toml")),
     ("xtx7900", include_str!("../../../examples/server/builders/xtx7900.toml")),
+    ("nvidia-dlss", include_str!("../../../examples/server/builders/nvidia-dlss.toml")),
     ("nvidia", include_str!("../../../examples/server/builders/nvidia.toml")),
     ("coolfox", include_str!("../../../examples/server/builders/coolfox.toml")),
     ("kelvaroq", include_str!("../../../examples/server/builders/kelvaroq.toml")),

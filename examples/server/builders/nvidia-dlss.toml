@@ -1,0 +1,20 @@
+# The NVIDIA fork with DLSS super resolution and DLSS frame generation
+# (NVIDIA Streamline), switched on. Needs a GeForce RTX card (frame generation:
+# RTX 40 or later), Windows 10 2004+ and hardware-accelerated GPU scheduling.
+#
+# One-off: NVIDIA's files are not in the repository. After the first build, in
+# the builder's clone folder (the folder icon in the launcher), run
+# Get-NVIDIA-DLSS.cmd. It downloads about 70 MB from NVIDIA's own GitHub
+# (NVIDIA-RTX/Streamline) into nvidia-sdk\. Without them the game still runs
+# with its own upscaling (see docs/dlss.md of the repository).
+extends = "nvidia"
+name = "NVIDIA · DLSS + frame generation"
+description = "DLSS performance mode and 2x frame generation; run Get-NVIDIA-DLSS.cmd once."
+tags = ["victory", "nvidia", "dlss", "series-s"]
+order = 61
+
+[run_env]
+VICTORY_STREAMLINE_DIR = "{repo_dir}/nvidia-sdk/Streamline/bin/x64"
+VICTORY_DLSS = "1"
+VICTORY_DLSS_MODE = "performance"
+VICTORY_FRAMEGEN = "1"
