@@ -7,7 +7,4 @@ tags = ["victory", "nvidia", "release", "series-x"]
 order = 60
 
 [vars]
-console = "series-x"
-
-[run_env]
-VICTORY_NATIVE_1440P = "1"
+run_flags = "--res 1440 --dlss off"

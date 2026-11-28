@@ -6,4 +6,4 @@ tags = ["victory", "nvidia", "release", "series-s"]
 order = 62
 
 [vars]
-console = "series-s"
+run_flags = "--series-s --dlss off"

@@ -20,14 +20,8 @@ build = [
 ]
 
 [vars]
-console = "series-x"
+run_flags = "--res 1440 --dlss quality --framegen 4"
 
-[run_env]
-VICTORY_NATIVE_1440P = "1"
+# `play` keeps this one, and finds the files the build step fetched.
+[env]
 VICTORY_STREAMLINE_DIR = "{repo_dir}/nvidia-sdk/Streamline/bin/x64"
-VICTORY_DLSS = "1"
-VICTORY_DLSS_MODE = "quality"
-VICTORY_FRAMEGEN = "1"
-VICTORY_FRAMEGEN_X = "4"
-# Frame generation needs 1.5 to 2 GB of the card's memory: leave it a fifth.
-VICTORY_TEXTURE_ROOM_PERCENT = "80"
